@@ -33,7 +33,7 @@ impl<S: SetState + Clone> StateRule<S> {
             self.allowed_neighbors.push(None);
         }
         if let Some(allowed_neighbors) = &mut self.allowed_neighbors[neighbor_index] {
-            allowed_neighbors.set_states(&allowed);
+            allowed_neighbors.set_states(allowed);
         } else {
             self.allowed_neighbors[neighbor_index] = Some(allowed.clone());
         }

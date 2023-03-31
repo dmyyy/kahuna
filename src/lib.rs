@@ -47,8 +47,8 @@ fn find_next_to_collapse<St: State, Sp: Space<St>>(
         }
     }
     unresoved_set.retain(|x| !resolved_set.contains(x));
-    if lowest_entropy_set.len() == 0 {
-        return None;
+    if lowest_entropy_set.is_empty() {
+        None
     } else {
         Some(lowest_entropy_set[thread_rng().gen_range(0..lowest_entropy_set.len())])
     }
@@ -123,11 +123,11 @@ fn run_propogation<Rule: CollapseRule<St, Sp>, St: State, Sp: Space<St>>(
         let entropy_before = space[propogating].entropy();
 
         if entropy_before != 0 {
-            space.neighbors(propogating, &neighbor_directions, neighbors);
+            space.neighbors(propogating, neighbor_directions, neighbors);
             for i in 0..neighbor_directions.len() {
                 neighbor_states[i] = neighbors[i].map(|coord| space[coord].clone());
             }
-            rule.collapse(&mut space[propogating], &neighbor_states[..]);
+            rule.collapse(&mut space[propogating], neighbor_states);
             let entropy_after = space[propogating].entropy();
 
             if entropy_after < entropy_before {

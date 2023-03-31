@@ -17,7 +17,7 @@ impl<const FINAL_STATE_COUNT: u32> BitsetState<FINAL_STATE_COUNT> {
     /// Creates a state representing the states numbered by members of `states`
     pub fn with_states(states: &[u32]) -> Self {
         let mut x: u64 = 0;
-        for i in &states[..] {
+        for i in states {
             assert!(*i < FINAL_STATE_COUNT);
             x |= 1u64 << i;
         }
