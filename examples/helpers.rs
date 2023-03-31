@@ -14,35 +14,27 @@ const B: S = S::state(1);
 const C: S = S::state(2);
 
 fn to_char(s: &S) -> char {
-	match *s {
-		A => 'A',
-		B => 'B',
-		C => 'C',
-		_ => '?',
-	}
+    match *s {
+        A => 'A',
+        B => 'B',
+        C => 'C',
+        _ => '?',
+    }
 }
 
 fn main() {
-	let rule = SetCollapseRuleBuilder::new(UniformSetCollapseObserver)
-		.allow(&A, &[
-			(LEFT, B | C),
-			(RIGHT, B | C),
-			(UP, A),
-		])
-		.allow(&B, &[
-			(UP, C),
-			(DOWN, C),
-		])
-		
-		.build();
-	
-	let mut space = SquareGrid::new(20, 10, |_, _| S::all());
-	kahuna::collapse(&mut space, &rule);
-	for y in 0..10 {
-		for x in 0..20 {
-			print!("{} ", to_char(&space[(x, y)]));
-		}
-		println!("");
-	}
-	println!("");
+    let rule = SetCollapseRuleBuilder::new(UniformSetCollapseObserver)
+        .allow(&A, &[(LEFT, B | C), (RIGHT, B | C), (UP, A)])
+        .allow(&B, &[(UP, C), (DOWN, C)])
+        .build();
+
+    let mut space = SquareGrid::new(20, 10, |_, _| S::all());
+    kahuna::collapse(&mut space, &rule);
+    for y in 0..10 {
+        for x in 0..20 {
+            print!("{} ", to_char(&space[(x, y)]));
+        }
+        println!("");
+    }
+    println!("");
 }
