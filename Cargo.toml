@@ -1,7 +1,7 @@
 [package]
 name = "kahuna"
 version = "0.3.0"
-authors = ["Liam Taylor <liam.tab@gail.com>"]
+authors = ["Liam Taylor <liam.tab@gail.com>", "Dmytro Banin <dima_banin@hotmail.com>"]
 description = "A basic implementation of wave-function collapse for procedural generation"
 repository = "https://github.com/OutOfTheVoid/kahuna"
 homepage = "https://github.com/OutOfTheVoid/kahuna"
@@ -21,6 +21,7 @@ exclude = [
 
 [dependencies]
 rand = "0.8.5"
+bevy_utils = "0.10.0"
 
 [dev-dependencies]
 image = "0.24.2"

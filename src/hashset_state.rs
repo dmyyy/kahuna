@@ -1,4 +1,5 @@
-use std::{collections::HashSet, hash::Hash};
+use bevy_utils::HashSet;
+use std::hash::Hash;
 
 use crate::{SetState, State};
 
