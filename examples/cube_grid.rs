@@ -2,6 +2,7 @@ use bevy_utils::{HashMap, HashSet};
 use kahuna::cube_grid::CubeGrid;
 use kahuna::hashset_state::HashsetState;
 use kahuna::set_rule::*;
+use kahuna::Weighted;
 use serde::{Deserialize, Serialize};
 
 const RIGHT: (isize, isize, isize) = (1, 0, 0);
@@ -10,6 +11,15 @@ const LEFT: (isize, isize, isize) = (-1, 0, 0);
 const BACK: (isize, isize, isize) = (0, 0, 1);
 const ABOVE: (isize, isize, isize) = (0, 1, 0);
 const BELOW: (isize, isize, isize) = (0, -1, 0);
+
+struct State {
+    state: HashsetState<String>,
+    weights: HashMap<String, u32>,
+}
+
+impl Weighted for State {
+    fn get_weight(&self) -> u32 {}
+}
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct Prototypes(pub HashMap<String, Prototype>);
