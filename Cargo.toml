@@ -1,19 +1,16 @@
 [package]
-name = "kahuna"
-version = "0.3.0"
+name = "wfc3D"
+version = "0.1.0"
 authors = ["Liam Taylor <liam.tab@gail.com>", "Dmytro Banin <dima_banin@hotmail.com>"]
-description = "A basic implementation of wave-function collapse for procedural generation"
+description = "A basic implementation of wave-function collapse for procedural generation in 3D"
 repository = "https://github.com/OutOfTheVoid/kahuna"
 homepage = "https://github.com/OutOfTheVoid/kahuna"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 edition = "2021"
-keywords = ["gamedev", "procgen", "wave", "function", "collapse"]
-categories = ["algorithms", "mathematics", "game-development"]
 exclude = [
     "Cargo.lock",
     "target",
-    "procedural_texture.png",
     ".vscode"
 ]
 
