@@ -433,7 +433,7 @@ fn main() {
             "neg_z": "-1f",
             "constrain_to": "-1",
             "constrain_from": "-1",
-            "weight": 1,
+            "weight": 0,
             "valid_neighbors": [
                 [
                     "p-1"

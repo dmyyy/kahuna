@@ -24,7 +24,8 @@ pub struct WeightedSetCollapseObserver<T: Eq + Hash + Clone> {
 }
 
 // States are chosen based on their relative weight compared to the sum of weights of all states.
-// States with a weight of 0 will never be chosen.
+// States with a weight of 0 will never be chosen by the observer (they can still be picked by the
+// algorithm if that's the only possible remaining state)
 impl<S: SetState + State + Clone + Final<T>, T: Eq + Hash + Clone> SetCollapseObserver<S>
     for WeightedSetCollapseObserver<T>
 {
@@ -44,14 +45,13 @@ impl<S: SetState + State + Clone + Final<T>, T: Eq + Hash + Clone> SetCollapseOb
         }
 
         let rand = thread_rng().gen_range(0..*weight_vec.last().unwrap());
-        let mut diff = 0;
+        let mut prev = 0;
         for (i, weight) in weight_vec.into_iter().enumerate() {
-            diff = weight - diff;
-            if weight >= rand && diff != 0 {
+            if weight >= rand && weight - prev != 0 {
                 *cell = final_states[i].clone();
                 return;
             }
-            diff = weight;
+            prev = weight;
         }
     }
 }
