@@ -1,3 +1,5 @@
+use std::hash::Hash;
+
 /// Represents set-like states
 pub trait SetState: Sized {
     /// Adds the states represented in `states` to `self`
@@ -8,4 +10,9 @@ pub trait SetState: Sized {
     fn clear_states(&mut self, states: &Self);
     /// Separates out all the final (0-entropy) states from this state into a Vec
     fn collect_final_states(&self, states: &mut Vec<Self>);
+}
+
+pub trait Final<T: Eq + Hash + Clone> {
+    // Returns the final state inner value if the state has converged and none otherwise
+    fn get(&self) -> Option<T>;
 }

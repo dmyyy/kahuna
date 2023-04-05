@@ -1,7 +1,12 @@
-Kahuna
+Kahuna3D
 ======
 
-Fork of https://github.com/OutOfTheVoid/kahuna that fixes a couple things and implements 3D grids
+Fork of https://github.com/OutOfTheVoid/kahuna which makes sets more useable and provides a 3D implementation.
+- Allows for run-time determination of all_state
+- Use bevy_utils hash set implementation
+- Add Cube Grid
+
+Removed bitset implementation - use the original repo if you want to use bitsets.
 
 [![Crates.io](https://img.shields.io/crates/v/kahuna.svg?label=Kahuna)](https://crates.io/crates/kahuna) [![docs.rs](https://docs.rs/kahuna/badge.svg)](https://docs.rs/kahuna/)
 
@@ -11,6 +16,9 @@ This crate is a basic extensible implementation of [Wave Function Collapse](http
 
 - Support for custom grids of arbitrary dimension and topology, as long as there is an upper bound to cell neighbors
 - Basic square grid implementation provided
+
+## Examples
+
 
 ## License
 

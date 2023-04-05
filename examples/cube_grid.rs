@@ -2,7 +2,6 @@ use bevy_utils::{HashMap, HashSet};
 use kahuna::cube_grid::CubeGrid;
 use kahuna::hashset_state::HashsetState;
 use kahuna::set_rule::*;
-use kahuna::Weighted;
 use serde::{Deserialize, Serialize};
 
 const RIGHT: (isize, isize, isize) = (1, 0, 0);
@@ -11,16 +10,6 @@ const LEFT: (isize, isize, isize) = (-1, 0, 0);
 const BACK: (isize, isize, isize) = (0, 0, 1);
 const ABOVE: (isize, isize, isize) = (0, 1, 0);
 const BELOW: (isize, isize, isize) = (0, -1, 0);
-
-struct State {
-    state: HashsetState<String>,
-    weights: HashMap<String, u32>,
-}
-
-impl Weighted for State {
-    fn get_weight(&self) -> u32 {}
-}
-
 #[derive(Serialize, Deserialize, Default)]
 pub struct Prototypes(pub HashMap<String, Prototype>);
 
@@ -36,7 +25,7 @@ pub struct Prototype {
     pub neg_z: String,
     pub constrain_to: String,
     pub constrain_from: String,
-    pub weight: u8,
+    pub weight: u32,
     // 0 - +x
     // 1 - -z
     // 2 - -x
@@ -486,11 +475,19 @@ fn main() {
 
     let prototypes: Prototypes = serde_json::from_str(data).unwrap();
 
-    let all_state = HashsetState::<String> {
-        hashset: prototypes.0.keys().cloned().collect(),
+    let mut all_state = HashsetState::<String> {
+        hashset: HashSet::new(),
     };
+    let mut weights: HashMap<String, u32> = HashMap::new();
+    for prototype in prototypes.0.iter() {
+        all_state.hashset.insert(prototype.0.clone());
+        weights.insert(prototype.0.clone(), prototype.1.weight);
+    }
 
-    let mut rule = SetCollapseRuleBuilder::new(UniformSetCollapseObserver, all_state.clone());
+    println!("weights: {:?}", weights);
+
+    let observer = WeightedSetCollapseObserver::<String> { weights };
+    let mut rule = SetCollapseRuleBuilder::new(observer, all_state.clone());
     for (k, v) in prototypes.0 {
         rule = rule
             .allow(

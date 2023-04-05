@@ -1,12 +1,12 @@
 use bevy_utils::HashSet;
 use std::hash::Hash;
 
-use crate::{SetState, State};
+use crate::{Final, SetState, State};
 
 /// A state type which represents possible states with a hash set.
 ///
 /// * `T` - The underlying unique state identifier
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct HashsetState<T: Eq + Hash> {
     pub hashset: HashSet<T>,
 }
@@ -59,5 +59,15 @@ impl<T: Clone + Eq + Hash> SetState for HashsetState<T> {
                 states.push(Self::new_final(x));
             })
             .for_each(drop);
+    }
+}
+
+impl<T: Clone + Eq + Hash> Final<T> for HashsetState<T> {
+    fn get(&self) -> Option<T> {
+        if self.hashset.len() == 1 {
+            self.hashset.iter().next().cloned()
+        } else {
+            None
+        }
     }
 }

@@ -1,5 +1,7 @@
-use crate::{AllState, CollapseRule, InvertDelta, SetState, Space, State};
+use crate::{CollapseRule, Final, InvertDelta, SetState, Space, State};
+use bevy_utils::HashMap;
 use rand::{thread_rng, Rng};
+use std::hash::Hash;
 
 pub trait SetCollapseObserver<S: State> {
     fn observe(&self, cell: &mut S, neighbors: &[Option<S>]);
@@ -13,6 +15,44 @@ impl<S: SetState + State + Clone> SetCollapseObserver<S> for UniformSetCollapseO
         let mut final_states = Vec::new();
         cell.collect_final_states(&mut final_states);
         *cell = final_states[thread_rng().gen_range(0..final_states.len())].clone();
+    }
+}
+
+#[derive(Clone)]
+pub struct WeightedSetCollapseObserver<T: Eq + Hash + Clone> {
+    pub weights: HashMap<T, u32>,
+}
+
+// States are chosen based on their relative weight compared to the sum of weights of all states.
+// States with a weight of 0 will never be chosen.
+impl<S: SetState + State + Clone + Final<T>, T: Eq + Hash + Clone> SetCollapseObserver<S>
+    for WeightedSetCollapseObserver<T>
+{
+    fn observe(&self, cell: &mut S, _: &[Option<S>]) {
+        let mut final_states = Vec::new();
+        cell.collect_final_states(&mut final_states);
+
+        // calculate running sum of all weights for each state
+        let mut weight_vec: Vec<u32> = vec![0; final_states.len()];
+        if !final_states.is_empty() {
+            let state = final_states[0].get().unwrap();
+            weight_vec[0] = *self.weights.get(&state).unwrap();
+        }
+        for (i, final_state) in final_states.iter().enumerate().skip(1) {
+            let state = final_state.get().unwrap();
+            weight_vec[i] = *self.weights.get(&state).unwrap() + weight_vec[i - 1];
+        }
+
+        let rand = thread_rng().gen_range(0..*weight_vec.last().unwrap());
+        let mut diff = 0;
+        for (i, weight) in weight_vec.into_iter().enumerate() {
+            diff = weight - diff;
+            if weight >= rand && diff != 0 {
+                *cell = final_states[i].clone();
+                return;
+            }
+            diff = weight;
+        }
     }
 }
 
@@ -40,9 +80,7 @@ impl<S: SetState + Clone> StateRule<S> {
     }
 }
 
-/// builder for [SetCollapseRule]
-///
-/// Automatically collects used coordinate deltas and manages creating symmetric rules from asymmetric definitions
+// Builder for SetCollapseRule
 pub struct SetCollapseRuleBuilder<
     S: SetState + State,
     Sp: Space<S>,
@@ -51,32 +89,29 @@ pub struct SetCollapseRuleBuilder<
     neighbor_offsets: Vec<Sp::CoordinateDelta>,
     state_rules: Vec<StateRule<S>>,
     observer: O,
+    all_state: S,
 }
 
-impl<
-        S: AllState + SetState + State + PartialEq,
-        Sp: Space<S>,
-        O: SetCollapseObserver<S> + Clone,
-    > SetCollapseRuleBuilder<S, Sp, O>
+impl<S: SetState + State + PartialEq, Sp: Space<S>, O: SetCollapseObserver<S> + Clone>
+    SetCollapseRuleBuilder<S, Sp, O>
 where
     Sp::CoordinateDelta: Eq + Clone + InvertDelta,
 {
-    pub fn new(observer: O) -> Self {
+    pub fn new(observer: O, all_state: S) -> Self {
         Self {
             neighbor_offsets: Vec::new(),
             state_rules: Vec::new(),
             observer,
+            all_state,
         }
     }
 
-    /// Set the allowed neighbors for a cell based on their coordinate deltas
-    ///
-    /// This will create symmetric rules. For example, if you set state A to be
-    /// allowed to the left of B, then state B will be allowed to the right of
-    /// A - you don't have to explicitly set both rules.
-    ///
-    /// States which do not have any allowed neighbors for a given coordinate
-    /// delta will equire that those coordinates are outside of world-space.
+    // Set the allowed neighbors for a cell based on their coordinate deltas
+    //
+    // Rules aren't added symmetrically - only provided rules will be added
+    //
+    // States which do not have any allowed neighbors for a given coordinate
+    // delta will require that those coordinates are outside of world-space.
     pub fn allow(mut self, state: &S, neighbors: &[(Sp::CoordinateDelta, S)]) -> Self {
         let mut states = Vec::new();
         state.collect_final_states(&mut states);
@@ -85,18 +120,12 @@ where
                 let mut neighbor_states = Vec::new();
                 neighbor.collect_final_states(&mut neighbor_states);
                 for n_state in neighbor_states {
-                    self.allow_symmetric(&state, &n_state, delta);
+                    let offset_index = self.get_offset_index(delta.clone());
+                    self.get_rule(&state).add_allowed(offset_index, &n_state);
                 }
             }
         }
         self
-    }
-
-    fn allow_symmetric(&mut self, a: &S, b: &S, offset: &Sp::CoordinateDelta) {
-        let offset_index = self.get_offset_index(offset.clone());
-        self.get_rule(a).add_allowed(offset_index, b);
-        let offset_index = self.get_offset_index(offset.invert_delta());
-        self.get_rule(b).add_allowed(offset_index, a);
     }
 
     fn get_offset_index(&mut self, offset: Sp::CoordinateDelta) -> usize {
@@ -126,7 +155,7 @@ where
 
     pub fn build(self) -> SetCollapseRule<S, Sp, O> {
         let mut state_rules = Vec::new();
-        let mut remaining_state = S::all();
+        let mut remaining_state = self.all_state;
         for mut proto_rule in self.state_rules {
             while proto_rule.allowed_neighbors.len() < self.neighbor_offsets.len() {
                 proto_rule.allowed_neighbors.push(None);
@@ -153,7 +182,7 @@ where
     }
 }
 
-/// A collapse rule implementation that works with implementors of [crate::SetState]
+// A collapse rule implementation that works with implementors of [crate::SetState<T>]
 impl<S: SetState + State, Sp: Space<S>, O: SetCollapseObserver<S>> CollapseRule<S, Sp>
     for SetCollapseRule<S, Sp, O>
 where
