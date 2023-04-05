@@ -484,8 +484,6 @@ fn main() {
         weights.insert(prototype.0.clone(), prototype.1.weight);
     }
 
-    println!("weights: {:?}", weights);
-
     let observer = WeightedSetCollapseObserver::<String> { weights };
     let mut rule = SetCollapseRuleBuilder::new(observer, all_state.clone());
     for (k, v) in prototypes.0 {
