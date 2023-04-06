@@ -1,5 +1,5 @@
 [package]
-name = "wfc3D"
+name = "wfc3d"
 version = "0.1.0"
 authors = ["Liam Taylor <liam.tab@gail.com>", "Dmytro Banin <dima_banin@hotmail.com>"]
 description = "A basic implementation of wave-function collapse for procedural generation in 3D"

@@ -23,7 +23,7 @@ pub struct WeightedSetCollapseObserver<T: Eq + Hash + Clone> {
     pub weights: HashMap<T, u32>,
 }
 
-// States are chosen based on their relative weight compared to the sum of weights of all states.
+// States are chosen based on their relative weight compared to the sum of weights of remaining states.
 // States with a weight of 0 will never be chosen by the observer (they can still be picked by the
 // algorithm if that's the only possible remaining state)
 impl<S: SetState + State + Clone + Final<T>, T: Eq + Hash + Clone> SetCollapseObserver<S>

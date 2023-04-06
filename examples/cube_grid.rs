@@ -1,8 +1,8 @@
 use bevy_utils::{HashMap, HashSet};
-use kahuna::cube_grid::CubeGrid;
-use kahuna::hashset_state::HashsetState;
-use kahuna::set_rule::*;
 use serde::{Deserialize, Serialize};
+use wfc3d::cube_grid::CubeGrid;
+use wfc3d::hashset_state::HashsetState;
+use wfc3d::set_rule::*;
 
 const RIGHT: (isize, isize, isize) = (1, 0, 0);
 const FRONT: (isize, isize, isize) = (0, 0, -1);
@@ -547,7 +547,7 @@ fn main() {
     // TODO: set predetermined states by modifying init_fn based on current coords
     let init_fn = |_x, _y, _z| all_state.clone();
     let mut space = CubeGrid::new(3, 3, 3, init_fn);
-    kahuna::collapse(&mut space, &rule.build());
+    wfc3d::collapse(&mut space, &rule.build());
 
     // Print out the collapsed 3x3 cube layer by layer
     for y in 0..3 {
