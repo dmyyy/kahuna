@@ -1,7 +1,7 @@
-wfc3D
+wfc3d
 ======
 
-Fork of https://github.com/OutOfTheVoid/kahuna which extends it via .
+Fork of https://github.com/OutOfTheVoid/kahuna which extends it for use in 3d with the following changes
 - Allows for run-time determination of all_state
 - Use bevy_utils hash set implementation
 - Adds Cube Grid implementation
