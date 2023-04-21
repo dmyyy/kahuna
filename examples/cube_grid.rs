@@ -544,16 +544,18 @@ fn main() {
             );
     }
 
+    let cube_dim = 100;
+
     // TODO: set predetermined states by modifying init_fn based on current coords
     let init_fn = |_x, _y, _z| all_state.clone();
-    let mut space = CubeGrid::new(3, 3, 3, init_fn);
+    let mut space = CubeGrid::new(cube_dim, cube_dim, 5, init_fn);
     wfc3d::collapse(&mut space, &rule.build());
 
     // Print out the collapsed 3x3 cube layer by layer
-    for y in 0..3 {
+    for y in 0..5 {
         print!("Layer: {}\n", y);
-        for z in 0..3 {
-            for x in 0..3 {
+        for z in 0..cube_dim {
+            for x in 0..cube_dim {
                 print!("{:?} ", (&space[(x, y, z)]));
             }
             print!("\n");

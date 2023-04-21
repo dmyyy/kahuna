@@ -33,6 +33,9 @@ impl<T: Eq + Hash + Clone> HashsetState<T> {
 
 impl<T: Clone + Eq + Hash> State for HashsetState<T> {
     fn entropy(&self) -> u32 {
+        if self.hashset.is_empty() {
+            0
+        }
         self.hashset.len() as u32 - 1
     }
 }
