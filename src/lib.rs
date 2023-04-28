@@ -66,15 +66,15 @@ pub fn collapse<Rule: CollapseRule<St, Sp>, St: State, Sp: Space<St>>(space: &mu
     let mut neighbors = vec![None; neighbor_directions.len()].into_boxed_slice();
     let mut neighbor_states =
         vec![Option::<St>::None; neighbor_directions.len()].into_boxed_slice();
-    let mut to_propogate = VecDeque::new();
+    let mut to_propagate = VecDeque::new();
 
     for coordinate in unresolved_set.iter() {
-        to_propogate.push_back(*coordinate);
+        to_propagate.push_back(*coordinate);
     }
-    run_propogation(
+    run_propagation(
         space,
         rule,
-        &mut to_propogate,
+        &mut to_propagate,
         &neighbor_directions,
         &mut neighbors,
         &mut neighbor_states,
@@ -86,7 +86,7 @@ pub fn collapse<Rule: CollapseRule<St, Sp>, St: State, Sp: Space<St>>(space: &mu
         &mut resolved_set,
         space,
     ) {
-        to_propogate.clear();
+        to_propagate.clear();
         space.neighbors(to_collapse, &neighbor_directions, &mut neighbors);
         for i in 0..neighbor_directions.len() {
             neighbor_states[i] = neighbors[i].map(|coord| space[coord].clone());
@@ -94,13 +94,13 @@ pub fn collapse<Rule: CollapseRule<St, Sp>, St: State, Sp: Space<St>>(space: &mu
         rule.observe(&mut space[to_collapse], &neighbor_states[..]);
         for i in 0..neighbor_directions.len() {
             if let Some(neighbor_coord) = neighbors[i] {
-                to_propogate.push_back(neighbor_coord);
+                to_propagate.push_back(neighbor_coord);
             }
         }
-        run_propogation(
+        run_propagation(
             space,
             rule,
-            &mut to_propogate,
+            &mut to_propagate,
             &neighbor_directions,
             &mut neighbors,
             &mut neighbor_states,
@@ -108,30 +108,30 @@ pub fn collapse<Rule: CollapseRule<St, Sp>, St: State, Sp: Space<St>>(space: &mu
     }
 }
 
-fn run_propogation<Rule: CollapseRule<St, Sp>, St: State, Sp: Space<St>>(
+fn run_propagation<Rule: CollapseRule<St, Sp>, St: State, Sp: Space<St>>(
     space: &mut Sp,
     rule: &Rule,
-    to_propogate: &mut VecDeque<Sp::Coordinate>,
+    to_propagate: &mut VecDeque<Sp::Coordinate>,
     neighbor_directions: &[Sp::CoordinateDelta],
     neighbors: &mut [Option<Sp::Coordinate>],
     neighbor_states: &mut [Option<St>],
 ) {
-    while let Some(propogating) = to_propogate.pop_front() {
-        let entropy_before = space[propogating].entropy();
+    while let Some(propagating) = to_propagate.pop_front() {
+        let entropy_before = space[propagating].entropy();
 
         if entropy_before != 0 {
-            space.neighbors(propogating, neighbor_directions, neighbors);
+            space.neighbors(propagating, neighbor_directions, neighbors);
             for i in 0..neighbor_directions.len() {
                 neighbor_states[i] = neighbors[i].map(|coord| space[coord].clone());
             }
-            rule.collapse(&mut space[propogating], neighbor_states);
-            let entropy_after = space[propogating].entropy();
+            rule.collapse(&mut space[propagating], neighbor_states);
+            let entropy_after = space[propagating].entropy();
 
             if entropy_after < entropy_before {
                 for i in 0..neighbor_directions.len() {
                     if let Some(neighbor) = neighbors[i] {
                         if space[neighbor].entropy() != 0 {
-                            to_propogate.push_back(neighbor);
+                            to_propagate.push_back(neighbor);
                         }
                     }
                 }
